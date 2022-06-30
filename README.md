@@ -1,6 +1,6 @@
 # pyscrapeTrain
 
-Python script for downloading all tracks from a traktrain.com url.
+Python script for downloading all tracks from a traktrain.com url. It functions as a TrakTrain downloader to mp3.
 
 Similar functionality to defunct scrapeTrainV2 but written in Python. (I wrote this from scratch as I don't have any experience with Ruby).
 
