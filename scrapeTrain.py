@@ -2,11 +2,31 @@ import requests
 import re
 import os
 import argparse
+import unicodedata
 from tqdm import tqdm
 from pathlib import Path
 from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+
+
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    # value = re.sub(r'[^\w\s-]', '', value.lower())
+    value = re.sub(r'[^\w\s-]', '', value)
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
+
 
 # os agnostic home path
 home_path = str(Path.home())
@@ -26,7 +46,7 @@ mp3_urls = []
 
 # find all tracks on the page to get title and mp3-url
 for d in soup.find_all("div", {"class": "js-profile-track"}):
-    track_names.append(d.find("div", {"class": "title__name-tooltip"}).text.strip('\n'))
+    track_names.append(slugify(d.find("div", {"class": "title__name-tooltip"}).text.strip('\n'), allow_unicode=True))
     mp3_urls.append(d.find(attrs={"data-id": True})['data-id'])
     # print(url['data-id'])
 
@@ -51,7 +71,7 @@ if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
 # use stub and mp3_urls to find all mp3 files on AWS and download them
-# stop stealing beats page by adding in origin and referer to request headers
+# avoid stop stealing beats page by adding in origin and referer to request headers
 print(f"Downloading {len(mp3_urls)} tracks by {artist}:")
 for i in tqdm(range(len(mp3_urls))):
     url = url_stub + mp3_urls[i]
