@@ -8,7 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 from bs4 import BeautifulSoup
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, TPE1, TALB, APIC
+from mutagen.id3 import ID3, TPE1, TIT2, TALB, APIC
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -45,16 +45,25 @@ parser.add_argument(
     type=str,
     help="directory to save mp3s to. format: <dir>/pyscrapeTrain/<artist>"
 )
+parser.add_argument(
+    '-a',
+    '--album',
+    dest='album',
+    default=None,
+    type=str,
+    help="Custom name for ID3 tags, for sorting"
+)
+
 args = parser.parse_args()
 tt_url = args.url
-artist = tt_url.rsplit('/', 1)[-1]  # artist name from end of url
+# artist = tt_url.rsplit('/', 1)[-1]  # artist name from end of url
 if not args.directory:
     # os agnostic home path
     output_dir = str(Path.home())
 else:
     output_dir = args.directory
 # define where to save mp3s
-dir_path = f"{output_dir}/pyscrapeTrain/{artist}"
+ALBUM = args.album
 
 # get TrakTrain page as beautiful soup object
 r = requests.get(tt_url)
@@ -62,6 +71,8 @@ soup = BeautifulSoup(r.content, 'html.parser')
 track_names = []
 mp3_urls = []
 artwork = []
+artist = soup.find("h1", {"class": "profile-bio__name"}).text
+dir_path = f"{output_dir}/pyscrapeTrain/{artist}"
 
 # find all tracks on the page to get title and mp3-url
 for d in soup.find_all(
@@ -134,7 +145,7 @@ for i in tqdm(range(len(mp3_urls))):
         # ID3 Frames:
         # https://mutagen.readthedocs.io/en/latest/api/id3_frames.html#id3v2-3-4-frames
         mp3.tags['TPE1'] = TPE1(encoding=3, text=artist)
-        mp3.tags['TIT2'] = TALB(encoding=3, text=track_names[i])
+        mp3.tags['TIT2'] = TIT2(encoding=3, text=track_names[i])
         album_art = urlopen(artwork[i]).read()
         mp3.tags['APIC'] = APIC(
             encoding=3,
@@ -143,6 +154,8 @@ for i in tqdm(range(len(mp3_urls))):
             desc=u'Cover',
             data=album_art
         )
+        if ALBUM:
+            mp3.tags['TALB'] = TALB(encoding=3, text=ALBUM)
         # Save mp3 then save metadata
         with open(path, 'wb') as f:
             f.write(content)

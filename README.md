@@ -22,7 +22,7 @@ python scrapeTrain.py https://traktrain.com/waifu
 ```
 
 Tracks are downloaded to a `pyscrapeTrain/artist` folder in your home directory. 
-
+### Changing folder
 To change download folder use the `-d` flag:
 ```bash
 python scrapeTrain.py <traktrain-url> -d /path/to/folder
@@ -34,3 +34,17 @@ For example:
 python scrapeTrain.py https://traktrain.com/waifu -d /Users/user/Documents
 ```
 Will create the following folder `/Users/user/Documents/pyscrapeTrain/waifu`.
+
+### Adding custom album
+You might want to listen to the playlist of tracks you just downloaded 
+so the script supports a custom album ID3 tag to allow you to sort in your media library.
+
+Use the `-a` tag to assign a custom album name.
+
+For example:
+```bash
+python scrapeTrain.py https://traktrain.com/waifu -a "tt waifu"
+```
+
+Which gives:
+![image](album%20example.png)
