@@ -50,6 +50,9 @@ artwork = []
 
 # find all tracks on the page to get title and mp3-url
 for d in soup.find_all("div", {"class": "js-profile-track"}):
+    # srcset get 2x value, example srcset:
+    # srcset="https://d369yr65ludl8k.cloudfront.net/60x60/138296/5d3828d2-7c7e-4d7f-b515-4dd97c83edc9.jpg 1x,
+    # https://d369yr65ludl8k.cloudfront.net/120x120/138296/5d3828d2-7c7e-4d7f-b515-4dd97c83edc9.jpg 2x"
     artwork.append(
         d.find(
             "img",
@@ -96,10 +99,11 @@ for i in tqdm(range(len(mp3_urls))):
     try:
         content = urlopen(req).read()
         mp3 = MP3(BytesIO(content))
-        with open(f"{dir_path}/{track_names[i]}.mp3", 'wb') as f:
-            f.write(content)
+        path = f"{dir_path}/{track_names[i]}.mp3"
         if mp3.tags is None:
             mp3.tags = ID3()
+        # ID3 Frames:
+        # https://mutagen.readthedocs.io/en/latest/api/id3_frames.html#id3v2-3-4-frames
         mp3.tags['TPE1'] = TPE1(encoding=3, text=artist)
         mp3.tags['TIT2'] = TALB(encoding=3, text=track_names[i])
         album_art = urlopen(artwork[i]).read()
@@ -110,8 +114,12 @@ for i in tqdm(range(len(mp3_urls))):
             desc=u'Cover',
             data=album_art
         )
-        mp3.save(f"{dir_path}/{track_names[i]}.mp3")
+        # Save mp3 then save metadata
+        with open(path, 'wb') as f:
+            f.write(content)
+        mp3.save(path)
     except HTTPError as e:
-        # sometimes tracks 404 on AWS, this is a problem with TrakTrain not the script
+        # sometimes tracks 404 on AWS
+        # this is a problem with TrakTrain not the script
         print(f"{e} \nfor track '{track_names[i]}' with url: {url}, continuing....")
         continue
