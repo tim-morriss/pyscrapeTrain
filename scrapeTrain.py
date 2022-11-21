@@ -1,11 +1,14 @@
-import requests
 import re
 import os
+from io import BytesIO
+import requests
 import argparse
 import unicodedata
 from tqdm import tqdm
 from pathlib import Path
 from bs4 import BeautifulSoup
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, TPE1, TALB, APIC
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -25,7 +28,7 @@ def slugify(value, allow_unicode=False):
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     # value = re.sub(r'[^\w\s-]', '', value.lower())
     value = re.sub(r'[^\w\s-]', '', value)
-    return re.sub(r'[-\s]+', '-', value).strip('-_')
+    return re.sub(r'[-\s]+', ' ', value).strip('-_')
 
 
 # os agnostic home path
@@ -43,15 +46,27 @@ r = requests.get(tt_url)
 soup = BeautifulSoup(r.content, 'html.parser')
 track_names = []
 mp3_urls = []
+artwork = []
 
 # find all tracks on the page to get title and mp3-url
 for d in soup.find_all("div", {"class": "js-profile-track"}):
-    track_names.append(slugify(d.find("div", {"class": "title__name-tooltip"}).text.strip('\n'), allow_unicode=True))
+    artwork.append(
+        d.find(
+            "img",
+            attrs={"srcset": True}
+        )['srcset'].split(', ')[1].split()[0]
+    )
+    track_names.append(
+        slugify(d.find(
+            "div",
+            {"class": "title__name-tooltip"}
+        ).text.strip('\n'), allow_unicode=True)
+    )
     mp3_urls.append(d.find(attrs={"data-id": True})['data-id'])
-    # print(url['data-id'])
 
 # print(track_names)
 # print(mp3_urls)
+# print(artwork)
 
 url_stub = ""
 
@@ -80,8 +95,22 @@ for i in tqdm(range(len(mp3_urls))):
     req.add_header("Referer", "https://traktrain.com/")
     try:
         content = urlopen(req).read()
+        mp3 = MP3(BytesIO(content))
         with open(f"{dir_path}/{track_names[i]}.mp3", 'wb') as f:
             f.write(content)
+        if mp3.tags is None:
+            mp3.tags = ID3()
+        mp3.tags['TPE1'] = TPE1(encoding=3, text=artist)
+        mp3.tags['TIT2'] = TALB(encoding=3, text=track_names[i])
+        album_art = urlopen(artwork[i]).read()
+        mp3.tags['APIC'] = APIC(
+            encoding=3,
+            mime='image/jpeg',
+            type=3,
+            desc=u'Cover',
+            data=album_art
+        )
+        mp3.save(f"{dir_path}/{track_names[i]}.mp3")
     except HTTPError as e:
         # sometimes tracks 404 on AWS, this is a problem with TrakTrain not the script
         print(f"{e} \nfor track '{track_names[i]}' with url: {url}, continuing....")
