@@ -54,9 +54,9 @@ def scrape_train(tt_url, output_dir):
         )
         mp3_urls.append(d.find(attrs={"data-id": True})['data-id'])
 
-    print(track_names)
-    print(mp3_urls)
-    print(artwork)
+    # print(track_names)
+    # print(mp3_urls)
+    # print(artwork)
 
     url_stubs = []
 
