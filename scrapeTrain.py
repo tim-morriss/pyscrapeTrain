@@ -10,7 +10,7 @@ from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TPE1, TIT2, TALB, APIC
 from urllib.error import HTTPError
 from urllib.request import urlopen
-from helpers import slugify, is_local, try_artworks, test_urls, is_tt_url
+from helpers import slugify, is_local, try_artwork, test_urls, is_tt_url
 
 
 def scrape_train(tt_url, output_dir):
@@ -96,7 +96,7 @@ def scrape_train(tt_url, output_dir):
             try:
                 album_art = urlopen(artwork[i]).read()
             except HTTPError:
-                album_art = try_artworks(artwork[i])
+                album_art = try_artwork(artwork[i])
             mp3.tags['APIC'] = APIC(
                 encoding=3,
                 mime='image/jpeg',

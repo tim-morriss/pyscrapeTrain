@@ -61,18 +61,24 @@ def test_urls(urls: list):
             continue
 
 
-def try_artworks(artwork_list: list):
+def try_artwork(artwork: str):
     """
-    Try artwork urls to see if they can be accessed successfully.
+    Try artwork sizes to see if they can be accessed successfully.
 
     :param artwork_list:
         list: List of artwork urls to check
     :return:
         urlopen object
     """
-    for artwork in artwork_list:
+    sizes = [
+        # '360x360',
+        '250x250',
+        '120x120',
+        '60x60'
+    ]
+    for size in sizes:
         try:
-            return urlopen(artwork).read()
+            return urlopen(artwork.replace('360x360', size)).read()
         except HTTPError:
             continue
 
