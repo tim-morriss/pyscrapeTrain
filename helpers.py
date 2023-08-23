@@ -19,7 +19,6 @@ def is_local(url: str):
         return os.path.exists(url_parsed.path)
     return False
 
-
 def slugify(value: str, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils

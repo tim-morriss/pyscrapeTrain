@@ -30,7 +30,9 @@ def scrape_train(tt_url, output_dir):
     track_names = []
     mp3_urls = []
     artwork = []
-    artist = soup.find("h1", {"class": "profile-bio__name"}).text
+    artist = slugify(
+        soup.find("h1", {"class": "profile-bio__name"}).text
+    ).strip()
     dir_path = f"{output_dir}/{artist}"
 
     # find all tracks on the page to get title and mp3-url
@@ -52,9 +54,9 @@ def scrape_train(tt_url, output_dir):
         )
         mp3_urls.append(d.find(attrs={"data-id": True})['data-id'])
 
-    # print(track_names)
-    # print(mp3_urls)
-    # print(artwork)
+    print(track_names)
+    print(mp3_urls)
+    print(artwork)
 
     url_stubs = []
 
@@ -94,7 +96,7 @@ def scrape_train(tt_url, output_dir):
             try:
                 album_art = urlopen(artwork[i]).read()
             except HTTPError:
-                album_art = try_artworks(artwork)
+                album_art = try_artworks(artwork[i])
             mp3.tags['APIC'] = APIC(
                 encoding=3,
                 mime='image/jpeg',
