@@ -65,8 +65,8 @@ def try_artwork(artwork: str):
     """
     Try artwork sizes to see if they can be accessed successfully.
 
-    :param artwork_list:
-        list: List of artwork urls to check
+    :param artwork:
+        list: Artwork to test
     :return:
         urlopen object
     """
