@@ -13,25 +13,25 @@ pip install -r requirements.txt
 # How to use:
 Simplest use-case:
 ```bash
-python scrapeTrain.py <traktrain-url>
+python pyscrapetrain.py <traktrain-url>
 ```
 
 For example: 
 ```bash
-python scrapeTrain.py https://traktrain.com/waifu
+python pyscrapetrain.py https://traktrain.com/waifu
 ```
 
 Tracks are downloaded to a `pyscrapeTrain/artist` folder in your home directory. 
 ## Changing folder
 To change download folder use the `-d` flag:
 ```bash
-python scrapeTrain.py <traktrain-url> -d /path/to/folder
+python pyscrapetrain.py <traktrain-url> -d /path/to/folder
 ```
 
 Which will create a `pyscrapeTrain/artist` folder under the path specified.
 For example:
 ```bash
-python scrapeTrain.py https://traktrain.com/waifu -d /Users/user/Documents
+python pyscrapetrain.py https://traktrain.com/waifu -d /Users/user/Documents
 ```
 Will create the following folder `/Users/user/Documents/pyscrapeTrain/waifu`.
 
@@ -43,7 +43,7 @@ Use the `-a` tag to assign a custom album name.
 
 For example:
 ```bash
-python scrapeTrain.py https://traktrain.com/waifu -a "tt waifu"
+python pyscrapetrain.py https://traktrain.com/waifu -a "tt waifu"
 ```
 
 Which gives:
@@ -58,7 +58,7 @@ For this use-case simply specify the filepath instead of a url.
 
 For example:
 ```bash
-python scrapeTrain.py example_url_list.txt
+python pyscrapetrain.py example_url_list.txt
 ```
 
 Example list of urls:

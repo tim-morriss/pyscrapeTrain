@@ -1,4 +1,6 @@
 beautifulsoup4
+halo
 mutagen
 requests
+simple-chalk
 tqdm
