@@ -26,7 +26,7 @@ Tracks are downloaded to a `pyscrapeTrain/artist` folder in your home directory.
 ## Changing folder
 To change download folder use the `-d` flag:
 ```bash
-python pyscrapetrain.py <traktrain-url> -d /path/to/folder
+pyscrapetrain <traktrain-url> -d /path/to/folder
 ```
 
 Which will create a `pyscrapeTrain/artist` folder under the path specified.
