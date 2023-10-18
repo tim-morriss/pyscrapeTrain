@@ -5,3 +5,4 @@ __pycache__/
 /build/
 /pyscrapetrain.egg-info/
 tracklist.txt
+/dist/
