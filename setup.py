@@ -6,13 +6,13 @@ with open("README.md", "r")as f:
 setuptools.setup(
     name="pyscrapetrain",
     packages=['pyscrapetrain'],
-    version="0.1.0",
+    version="0.1.1",
     description="CLI for downloading TrakTrain tracks",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Tim Morriss",
     url="https://github.com/tim-morriss/pyscrapeTrain",
-    download_url="https://github.com/tim-morriss/pyscrapeTrain/archive/refs/tags/v0.1.0.tar.gz",
+    download_url="https://github.com/tim-morriss/pyscrapeTrain/archive/refs/tags/v0.1.1.tar.gz",
     license="MIT",
     keywords=['traktrain', 'scrapeTrain'],
     install_requires=[
