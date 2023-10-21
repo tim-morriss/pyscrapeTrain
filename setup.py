@@ -23,7 +23,8 @@ setuptools.setup(
         'tqdm',
         'simple-chalk',
         'simple-term-menu',
-        'halo'
+        'halo',
+        'validators'
     ],
     python_requires='>=3.8',
     entry_points={

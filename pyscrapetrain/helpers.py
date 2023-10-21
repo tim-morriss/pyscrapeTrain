@@ -1,6 +1,7 @@
 import os
 import re
 import unicodedata
+from simple_chalk import chalk
 from urllib.parse import urlparse
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -94,7 +95,7 @@ def is_tt_url(tt_url: str):
         bool: True if it is a traktrain url, else False
     """
     if type(tt_url) is not str:
-        print("Doesn't look like you provided a URL...")
+        print(chalk.red.bold("Doesn't look like you provided a URL..."))
         exit()
     if tt_url.startswith("https://traktrain.com/"):
         return True

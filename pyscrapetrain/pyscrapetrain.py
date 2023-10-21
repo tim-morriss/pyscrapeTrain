@@ -3,8 +3,10 @@ import os
 import sys
 import argparse
 import requests
+import validators
 from halo import Halo
 from io import BytesIO
+from icecream import ic
 from pathlib import Path
 from mutagen.mp3 import MP3
 from bs4 import BeautifulSoup
@@ -41,10 +43,18 @@ class PyScrapeTrain:
         :return: BeautifulSoup
             Soup object of page
         """
+        if not validators.url(url):
+            url = "https://traktrain.com/" + url
+        # ic(url)
         if not helpers.is_tt_url(url):
-            raise Exception("Doesn't look like a TrakTrain.com url...")
+            print(chalk.red.bold("✖ Doesn't look like a TrakTrain.com url..."))
+            exit()
         r = requests.get(url)
-        return BeautifulSoup(r.content, 'html.parser')
+        soup = BeautifulSoup(r.content, 'html.parser')
+        if soup.find("div", {"class": "title-404"}):
+            print(chalk.red.bold(f"✖ The url {url} returns 404..."))
+            exit()
+        return soup
 
     @staticmethod
     def _get_artist_name(soup: BeautifulSoup):
@@ -78,9 +88,12 @@ class PyScrapeTrain:
         if data_endpoint.attrs.get('data-endpoint', False):
             return data_endpoint.attrs['data-endpoint'].split('/')[-1]
         else:
-            raise Exception(
-                f"{self.artist_name} doesn't seem to have any tracks..."
+            print(
+                chalk.red.bold(
+                    f"✖ {self.artist_name} doesn't seem to have any tracks..."
+                )
             )
+            exit()
 
     def _compile_tracklist(self, data_endpoint: str):
         stop = True
@@ -161,16 +174,18 @@ class PyScrapeTrain:
         # use stub and mp3_urls to find all mp3 files on AWS and download them
         # avoid stop stealing beats page by adding in origin and referer to
         # request headers
+        length_of_mp3_urls = len(self.mp3_urls)
         print(chalk.white.bold("-" * 10))
         print(chalk.white.bold(
-            f'Downloading {len(self.mp3_urls)} tracks by {self.artist_name}:'
+            f'Downloading {length_of_mp3_urls} tracks by {self.artist_name}:'
         ))
 
         for i in range(len(self.mp3_urls)):
             num = i + 1
             with Halo(
                     text=chalk.magenta(
-                        f'Downloading track {num}: {self.track_names[i]}...'
+                        f'Downloading track {num} of {length_of_mp3_urls}: '
+                        f'{self.track_names[i]}...'
                     ),
                     spinner="dots"
             ) as halo:
@@ -293,7 +308,7 @@ def cli():
         return output_dir, album, overwrite, url
     else:
         first_menu_options = [
-            "[s] Download a single artist",
+            "[s] Download an artist's tracks",
             "[e] Exit program"
         ]
         first_menu_index = term_menu(first_menu_options, "pyscrapeTrain")
@@ -330,6 +345,7 @@ def run():
             if url.endswith('.txt'):
                 with open(url) as f:
                     lines = f.readlines()
+                    lines = list(set(lines))
                     for line in lines:
                         try:
                             PyScrapeTrain(
