@@ -3,4 +3,5 @@ halo
 mutagen
 requests
 simple-chalk
+simple-term-menu
 tqdm

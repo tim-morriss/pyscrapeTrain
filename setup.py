@@ -22,6 +22,7 @@ setuptools.setup(
         'requests',
         'tqdm',
         'simple-chalk',
+        'simple-term-menu',
         'halo'
     ],
     python_requires='>=3.8',

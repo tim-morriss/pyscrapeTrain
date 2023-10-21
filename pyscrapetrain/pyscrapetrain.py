@@ -1,6 +1,6 @@
 import re
 import os
-import pyscrapetrain.helpers as helpers
+import sys
 import argparse
 import requests
 from halo import Halo
@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 from simple_chalk import chalk
 from urllib.error import HTTPError
 from urllib.request import urlopen
+import pyscrapetrain.helpers as helpers
+from simple_term_menu import TerminalMenu
 from mutagen.id3 import ID3, TPE1, TIT2, TALB, APIC
 
 
@@ -106,14 +108,17 @@ class PyScrapeTrain:
                         d.find(
                             "img",
                             attrs={"src": True}
+
                         )['src'].replace('60x60', '360x360')
                     )
-                    self.track_names.append(
-                        helpers.slugify(d.find(
+                    track_name = helpers.slugify(d.find(
                             "div",
                             {"class": "title__name-tooltip"}
                         ).text.strip('\n'), allow_unicode=True)
-                    )
+                    if track_name in self.track_names:
+                        self.track_names.append(track_name + "_1")
+                    else:
+                        self.track_names.append(track_name)
                     self.mp3_urls.append(
                         d.find(attrs={"data-id": True})['data-id'])
 
@@ -232,13 +237,21 @@ class PyScrapeTrain:
                     continue
 
 
-def run():
+def term_menu(options, title):
+    terminal_menu = TerminalMenu(options, title=title)
+    menu_entry_index = terminal_menu.show()
+    return menu_entry_index
+
+
+def cli():
     parser = argparse.ArgumentParser(
         description="Tool for downloading TrakTrain tracks."
     )
 
     parser.add_argument(
         'url',
+        nargs='?',
+        default=None,
         type=str,
         help="url for the traktrain profile",
     ),
@@ -266,20 +279,56 @@ def run():
         action="store_true"
     )
 
-    args = parser.parse_args()
-    if not args.directory:
-        # os agnostic home path
-        output_dir = str(Path.home()) + '/pyscrapetrain'
+    if sys.argv[1:]:
+        args = parser.parse_args(args=sys.argv[1:])
+        if not args.directory:
+            # os agnostic home path
+            output_dir = str(Path.home()) + '/pyscrapetrain'
+        else:
+            output_dir = args.directory
+        # define where to save mp3s
+        album = args.album
+        overwrite = args.overwrite
+        url = args.url
+        return output_dir, album, overwrite, url
     else:
-        output_dir = args.directory
-    # define where to save mp3s
-    album = args.album
-    overwrite = args.overwrite
+        first_menu_options = [
+            "[s] Download a single artist",
+            "[e] Exit program"
+        ]
+        first_menu_index = term_menu(first_menu_options, "pyscrapeTrain")
+        if first_menu_index == 0:
+            url = input("Enter the URL of the artist you want to scrape: ")
+            output_dir = input("What is the output directory you want to use "
+                               "(leave blank for default): ") or str(Path.home()) + '/pyscrapetrain'
+            overwrite_menu_options = [
+                "[y] Yes",
+                "[n] No"
+            ]
+            overwrite_menu_index = term_menu(
+                overwrite_menu_options,
+                "Overwrite files if they already exist?"
+            )
+            if overwrite_menu_index == 0:
+                overwrite = True
+            else:
+                overwrite = False
+            album = input("Do you want to save the output with an album ID3 "
+                          "tag (good for sorting in your music library, "
+                          "leave blank to turn off): ") or None
+            return output_dir, album, overwrite, url
+        if first_menu_index == 1:
+            exit()
 
-    if helpers.is_local(args.url):
+
+def run():
+
+    output_dir, album, overwrite, url = cli()
+
+    if helpers.is_local(url):
         try:
-            if args.url.endswith('.txt'):
-                with open(args.url) as f:
+            if url.endswith('.txt'):
+                with open(url) as f:
                     lines = f.readlines()
                     for line in lines:
                         try:
@@ -297,9 +346,4 @@ def run():
         except Exception as e:
             print(e)
     else:
-        tt_url = args.url
-        PyScrapeTrain(tt_url, output_dir).download_tracks(overwrite, album)
-
-
-if __name__ == '__main__':
-    run()
+        PyScrapeTrain(url, output_dir).download_tracks(overwrite, album)

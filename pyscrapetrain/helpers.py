@@ -93,6 +93,9 @@ def is_tt_url(tt_url: str):
     :return:
         bool: True if it is a traktrain url, else False
     """
+    if type(tt_url) is not str:
+        print("Doesn't look like you provided a URL...")
+        exit()
     if tt_url.startswith("https://traktrain.com/"):
         return True
     elif tt_url.startswith("https://www.traktrain.com/"):
