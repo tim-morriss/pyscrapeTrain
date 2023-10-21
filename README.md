@@ -27,7 +27,7 @@ Feel free to use the built in terminal interface to download tracks from a singl
 ```bash
 pyscrapetrain
 ```
-![image](https://raw.githubusercontent.com/tim-morriss/pyscrapeTrain/master/terminal_ui.png)
+![image](https://raw.githubusercontent.com/tim-morriss/pyscrapeTrain/dev/terminal_ui.png)
 
 
 ## CLI interface
