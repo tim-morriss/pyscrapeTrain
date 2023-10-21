@@ -108,12 +108,14 @@ class PyScrapeTrain:
                             attrs={"src": True}
                         )['src'].replace('60x60', '360x360')
                     )
-                    self.track_names.append(
-                        helpers.slugify(d.find(
-                            "div",
-                            {"class": "title__name-tooltip"}
-                        ).text.strip('\n'), allow_unicode=True)
-                    )
+                    track_name = helpers.slugify(d.find(
+                        "div",
+                        {"class": "title__name-tooltip"}
+                    ).text.strip('\n'), allow_unicode=True)
+                    if track_name in self.track_names:
+                        self.track_names.append(track_name + "_1")
+                    else:
+                        self.track_names.append(track_name)
                     self.mp3_urls.append(
                         d.find(attrs={"data-id": True})['data-id'])
 
