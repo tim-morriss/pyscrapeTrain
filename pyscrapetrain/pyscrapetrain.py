@@ -177,8 +177,8 @@ class PyScrapeTrain:
                 path = f"{self.dir_path}/{self.track_names[i]}.mp3"
                 if os.path.exists(path) and not overwrite:
                     halo.stop_and_persist(
-                        symbol=str(f'{chalk.red("✖")}'),
-                        text=chalk.red.dim(
+                        symbol=str(f'{chalk.yellow("〰")}'),
+                        text=chalk.yellow.dim(
                             f"{num} • {path} already exists, skipping..."
                         )
                     )

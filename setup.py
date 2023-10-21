@@ -6,7 +6,7 @@ with open("README.md", "r")as f:
 setuptools.setup(
     name="pyscrapetrain",
     packages=['pyscrapetrain'],
-    version="0.1.1",
+    version="0.1.2",
     description="CLI for downloading TrakTrain tracks",
     long_description=long_description,
     long_description_content_type="text/markdown",
