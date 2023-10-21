@@ -1,4 +1,5 @@
 import setuptools
+from pyscrapetrain import __version__
 
 with open("README.md", "r")as f:
     long_description = f.read()
@@ -6,7 +7,7 @@ with open("README.md", "r")as f:
 setuptools.setup(
     name="pyscrapetrain",
     packages=['pyscrapetrain'],
-    version="0.1.2",
+    version=__version__,
     description="CLI for downloading TrakTrain tracks",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -29,7 +30,7 @@ setuptools.setup(
     python_requires='>=3.8',
     entry_points={
         'console_scripts': [
-            'pyscrapetrain=pyscrapetrain.pyscrapetrain:run'
+            'pyscrapetrain=pyscrapetrain.run:run'
         ]
     },
     classifiers=[

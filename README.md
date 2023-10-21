@@ -6,20 +6,42 @@ It functions as a TrakTrain downloader to mp3.
 Similar functionality to defunct scrapeTrainV2 but written in Python. (I wrote this from scratch as I don't have any experience with Ruby).
 
 # Setup
-First install the pip package
+You can either clone this repo and run the application using the `main.py` file.
+
+If you chose to use this method then run:
+```bash
+pip install -r requirements.txt
+```
+And make sure to swap out all the commands in this document with `python main.py` instead of `pyscrapetrain.
+
+OR
+
+Install the pip package, using this command:
 ```bash
 pip install pyscrapetrain
 ```
 
 # How to use:
-Simplest use-case:
+## Terminal interface
+Feel free to use the built in terminal interface to download tracks from a single URL / artist name:
 ```bash
-pyscrapetrain <traktrain-url>
+pyscrapetrain
+```
+![image](https://raw.githubusercontent.com/tim-morriss/pyscrapeTrain/master/terminal_ui.png)
+
+
+## CLI interface
+```bash
+pyscrapetrain <traktrain url or artist name>
 ```
 
 For example: 
 ```bash
-pyscrapetrain https://traktrain.com/waifu
+pyscrapetrain https://traktrain.com/brknglss
+```
+OR
+```bash
+pyscrapetrain brknglss
 ```
 
 Tracks are downloaded to a `pyscrapeTrain/artist` folder in your home directory. 

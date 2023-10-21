@@ -1,1 +1,2 @@
-from .pyscrapetrain import run
+from .run import run
+from .config import __version__
