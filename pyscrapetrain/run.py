@@ -1,18 +1,46 @@
 import sys
 import argparse
+from pick import pick
 from icecream import ic
 from pathlib import Path
 from simple_chalk import chalk
-from simple_term_menu import TerminalMenu
 import pyscrapetrain.url_helpers as helpers
 from pyscrapetrain.config import __version__, __title__
 from pyscrapetrain.pyscrapetrain import PyScrapeTrain
 
 
-def term_menu(options, title):
-    terminal_menu = TerminalMenu(options, title=title)
-    menu_entry_index = terminal_menu.show()
-    return menu_entry_index
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+            It must be "yes" (the default), "no" or None (meaning
+            an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write(
+                "Please respond with 'yes' or 'no' "
+                "(or 'y' or 'n').\n"
+            )
 
 
 def cli():
@@ -65,14 +93,16 @@ def cli():
         return output_dir, album, overwrite, url
     else:
         first_menu_options = [
-            "[s] Download an artist's tracks",
-            "[e] Exit program"
+            "Download an artist's tracks",
+            "Exit program"
         ]
-        first_menu_index = term_menu(
+        first_menu_title = f"{__title__}" \
+                           f"\n Version: {__version__} " \
+                           f"\n Copyright 2022-2023"
+        _, first_menu_index = pick(
             first_menu_options,
-            f"{__title__}"
-            f"\n Version: {__version__} "
-            f"\n Copyright 2022-2023"
+            first_menu_title,
+            indicator=">"
         )
         if first_menu_index == 0:
             url = input("Enter the URL or name of the "
@@ -80,23 +110,15 @@ def cli():
             output_dir = (input("What is the output directory you want to use "
                                 "(leave blank for default): ")
                           or str(Path.home()) + '/pyscrapetrain')
-            overwrite_menu_options = [
-                "[y] Yes",
-                "[n] No"
-            ]
-            overwrite_menu_index = term_menu(
-                overwrite_menu_options,
-                "Overwrite files if they already exist?"
+            overwrite = query_yes_no(
+                "Overwrite files if they already exist?",
+                default="no"
             )
-            if overwrite_menu_index == 0:
-                overwrite = True
-            else:
-                overwrite = False
             album = input("Do you want to save the output with an album ID3 "
                           "tag (good for sorting in your music library, "
                           "leave blank to turn off): ") or None
             return output_dir, album, overwrite, url
-        if first_menu_index == 1:
+        elif first_menu_index == 1:
             exit()
 
 

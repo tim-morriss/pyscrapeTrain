@@ -23,9 +23,9 @@ setuptools.setup(
         'requests',
         'tqdm',
         'simple-chalk',
-        'simple-term-menu',
         'halo',
-        'validators'
+        'validators',
+        'pick'
     ],
     python_requires='>=3.8',
     entry_points={
