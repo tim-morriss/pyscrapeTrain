@@ -43,12 +43,12 @@ class PyScrapeTrain:
         # ic(url)
         if not helpers.is_tt_url(url):
             print(chalk.red.bold("✖ Doesn't look like a TrakTrain.com url..."))
-            exit()
+            raise Exception()
         r = requests.get(url)
         soup = BeautifulSoup(r.content, 'html.parser')
         if soup.find("div", {"class": "title-404"}):
             print(chalk.red.bold(f"✖ The url {url} returns 404..."))
-            exit()
+            return Exception()
         return soup
 
     @staticmethod
@@ -88,7 +88,7 @@ class PyScrapeTrain:
                     f"✖ {self.artist_name} doesn't seem to have any tracks..."
                 )
             )
-            exit()
+            raise Exception()
 
     def _compile_tracklist(self, data_endpoint: str):
         stop = True
