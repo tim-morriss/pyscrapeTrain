@@ -1,16 +1,15 @@
 import re
 import os
-import pyscrapetrain.helpers as helpers
-import argparse
 import requests
+import validators
 from halo import Halo
 from io import BytesIO
-from pathlib import Path
 from mutagen.mp3 import MP3
 from bs4 import BeautifulSoup
 from simple_chalk import chalk
 from urllib.error import HTTPError
 from urllib.request import urlopen
+import pyscrapetrain.url_helpers as helpers
 from mutagen.id3 import ID3, TPE1, TIT2, TALB, APIC
 
 
@@ -39,10 +38,18 @@ class PyScrapeTrain:
         :return: BeautifulSoup
             Soup object of page
         """
+        if not validators.url(url):
+            url = "https://traktrain.com/" + url
+        # ic(url)
         if not helpers.is_tt_url(url):
-            raise Exception("Doesn't look like a TrakTrain.com url...")
+            print(chalk.red.bold("✖ Doesn't look like a TrakTrain.com url..."))
+            raise Exception()
         r = requests.get(url)
-        return BeautifulSoup(r.content, 'html.parser')
+        soup = BeautifulSoup(r.content, 'html.parser')
+        if soup.find("div", {"class": "title-404"}):
+            print(chalk.red.bold(f"✖ The url {url} returns 404..."))
+            return Exception()
+        return soup
 
     @staticmethod
     def _get_artist_name(soup: BeautifulSoup):
@@ -76,9 +83,12 @@ class PyScrapeTrain:
         if data_endpoint.attrs.get('data-endpoint', False):
             return data_endpoint.attrs['data-endpoint'].split('/')[-1]
         else:
-            raise Exception(
-                f"{self.artist_name} doesn't seem to have any tracks..."
+            print(
+                chalk.red.bold(
+                    f"✖ {self.artist_name} doesn't seem to have any tracks..."
+                )
             )
+            raise Exception()
 
     def _compile_tracklist(self, data_endpoint: str):
         stop = True
@@ -106,12 +116,13 @@ class PyScrapeTrain:
                         d.find(
                             "img",
                             attrs={"src": True}
+
                         )['src'].replace('60x60', '360x360')
                     )
                     track_name = helpers.slugify(d.find(
-                        "div",
-                        {"class": "title__name-tooltip"}
-                    ).text.strip('\n'), allow_unicode=True)
+                            "div",
+                            {"class": "title__name-tooltip"}
+                        ).text.strip('\n'), allow_unicode=True)
                     if track_name in self.track_names:
                         self.track_names.append(track_name + "_1")
                     else:
@@ -158,24 +169,26 @@ class PyScrapeTrain:
         # use stub and mp3_urls to find all mp3 files on AWS and download them
         # avoid stop stealing beats page by adding in origin and referer to
         # request headers
+        length_of_mp3_urls = len(self.mp3_urls)
         print(chalk.white.bold("-" * 10))
         print(chalk.white.bold(
-            f'Downloading {len(self.mp3_urls)} tracks by {self.artist_name}:'
+            f'Downloading {length_of_mp3_urls} tracks by {self.artist_name}:'
         ))
 
         for i in range(len(self.mp3_urls)):
             num = i + 1
             with Halo(
                     text=chalk.magenta(
-                        f'Downloading track {num}: {self.track_names[i]}...'
+                        f'Downloading track {num} of {length_of_mp3_urls}: '
+                        f'{self.track_names[i]}...'
                     ),
                     spinner="dots"
             ) as halo:
                 path = f"{self.dir_path}/{self.track_names[i]}.mp3"
                 if os.path.exists(path) and not overwrite:
                     halo.stop_and_persist(
-                        symbol=str(f'{chalk.red("✖")}'),
-                        text=chalk.red.dim(
+                        symbol=str(f'{chalk.yellow("〰")}'),
+                        text=chalk.yellow.dim(
                             f"{num} • {path} already exists, skipping..."
                         )
                     )
@@ -233,75 +246,3 @@ class PyScrapeTrain:
                     )
                     continue
 
-
-def run():
-    parser = argparse.ArgumentParser(
-        description="Tool for downloading TrakTrain tracks."
-    )
-
-    parser.add_argument(
-        'url',
-        type=str,
-        help="url for the traktrain profile",
-    ),
-    parser.add_argument(
-        '-d',
-        '--dir',
-        dest='directory',
-        default=None,
-        type=str,
-        help="directory to save mp3s to. format: <dir>/pyscrapetrain/<artist>"
-    )
-    parser.add_argument(
-        '-a',
-        '--album',
-        dest='album',
-        default=None,
-        type=str,
-        help="Custom name for ID3 tags, for sorting"
-    )
-    parser.add_argument(
-        '-o',
-        '--overwrite',
-        dest='overwrite',
-        default=False,
-        action="store_true"
-    )
-
-    args = parser.parse_args()
-    if not args.directory:
-        # os agnostic home path
-        output_dir = str(Path.home()) + '/pyscrapetrain'
-    else:
-        output_dir = args.directory
-    # define where to save mp3s
-    album = args.album
-    overwrite = args.overwrite
-
-    if helpers.is_local(args.url):
-        try:
-            if args.url.endswith('.txt'):
-                with open(args.url) as f:
-                    lines = f.readlines()
-                    for line in lines:
-                        try:
-                            PyScrapeTrain(
-                                line.strip(),
-                                output_dir
-                            ).download_tracks(
-                                overwrite,
-                                album
-                            )
-                        except Exception as e:
-                            print(e)
-            else:
-                raise Exception("Please supply a txt file")
-        except Exception as e:
-            print(e)
-    else:
-        tt_url = args.url
-        PyScrapeTrain(tt_url, output_dir).download_tracks(overwrite, album)
-
-
-if __name__ == '__main__':
-    run()
