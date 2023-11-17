@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author="Tim Morriss",
     url="https://github.com/tim-morriss/pyscrapeTrain",
-    download_url="https://github.com/tim-morriss/pyscrapeTrain/archive/refs/tags/v0.1.1.tar.gz",
+    download_url="https://github.com/tim-morriss/pyscrapeTrain/archive/refs/tags/v0.1.3.tar.gz",
     license="MIT",
     keywords=['traktrain', 'scrapeTrain'],
     install_requires=[

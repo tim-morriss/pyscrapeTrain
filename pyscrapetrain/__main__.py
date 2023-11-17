@@ -1,9 +1,7 @@
 import sys
 import argparse
 from pick import pick
-from icecream import ic
 from pathlib import Path
-from simple_chalk import chalk
 import pyscrapetrain.url_helpers as helpers
 from pyscrapetrain.config import __version__, __title__
 from pyscrapetrain.pyscrapetrain import PyScrapeTrain
